@@ -1,0 +1,19 @@
+# Stage 1: Build the application
+FROM maven:3.9-eclipse-temurin-17 AS build
+WORKDIR /app
+
+# Copy the entire project
+COPY . .
+
+# Verify pom.xml exists
+RUN test -f pom.xml || (echo "pom.xml not found" && exit 1)
+
+# Build the application
+RUN mvn clean package -DskipTests
+
+# Stage 2: Run the application
+FROM eclipse-temurin:17-jre-jammy
+WORKDIR /app
+COPY --from=build /app/target/quarkus-app /app/quarkus-app
+EXPOSE 8080
+CMD ["java", "-jar", "/app/quarkus-app/quarkus-run.jar"] 
