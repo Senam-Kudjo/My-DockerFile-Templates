@@ -1,0 +1,99 @@
+version: '3.9'
+services:
+  redis-node-1:
+    image: redis:6.2
+    command: ["redis-server", "--cluster-enabled", "yes", "--cluster-config-file", "/data/nodes.conf", "--cluster-node-timeout", "7000", "--appendonly", "yes"]
+    ports:
+      - "7001:6379"
+    volumes:
+      - redis-data-node-1:/data
+      - ./redis/redis-tests/redis-node-1.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      redis-cluster:
+        ipv4_address: 192.168.1.13
+  redis-node-2:
+    image: redis:6.2
+    command: ["redis-server", "--cluster-enabled", "yes", "--cluster-config-file", "/data/nodes.conf", "--cluster-node-timeout", "7000", "--appendonly", "yes"]
+    ports:
+      - "7002:6379"
+    volumes:
+      - redis-data-node-2:/data
+      - ./redis/redis-tests/redis-node-2.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      redis-cluster:
+        ipv4_address: 192.168.1.14
+  redis-node-3:
+    image: redis:6.2
+    command: ["redis-server", "--cluster-enabled", "yes", "--cluster-config-file", "/data/nodes.conf", "--cluster-node-timeout", "7000", "--appendonly", "yes"]
+    ports:
+      - "7003:6379"
+    volumes:
+      - redis-data-node-3:/data
+      - ./redis/redis-tests/redis-node-3.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      redis-cluster:
+        ipv4_address: 192.168.1.15
+  redis-node-4:
+    image: redis:6.2
+    command: ["redis-server", "--cluster-enabled", "yes", "--cluster-config-file", "/data/nodes.conf", "--cluster-node-timeout", "7000", "--appendonly", "yes"]
+    ports:
+      - "7004:6379"
+    volumes:
+      - redis-data-node-4:/data
+      - ./redis/redis-tests/redis-node-4.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      redis-cluster:
+        ipv4_address: 192.168.1.16
+  redis-node-5:
+    image: redis:6.2
+    command: ["redis-server", "--cluster-enabled", "yes", "--cluster-config-file", "/data/nodes.conf", "--cluster-node-timeout", "7000", "--appendonly", "yes"]
+    ports:
+      - "7005:6379"
+    volumes:
+      - redis-data-node-5:/data
+      - ./redis/redis-tests/redis-node-5.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      redis-cluster:
+        ipv4_address: 192.168.1.17
+  redis-node-6:
+    image: redis:6.2
+    command: ["redis-server", "--cluster-enabled", "yes", "--cluster-config-file", "/data/nodes.conf", "--cluster-node-timeout", "7000", "--appendonly", "yes"]
+    ports:
+      - "7006:6379"
+    volumes:
+      - redis-data-node-6:/data
+      - ./redis/redis-tests/redis-node-6.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      redis-cluster:
+        ipv4_address: 192.168.1.18
+redis-cluster-setup:
+image: redis:6.2
+depends_on:
+- redis-node-1
+- redis-node-2
+- redis-node-3
+- redis-node-4
+- redis-node-5
+- redis-node-6
+entrypoint: >
+sh -c "
+echo yes | redis-cli --cluster create
+192.168.1.13:7001 192.168.1.14:7002 192.168.1.15:7003
+192.168.1.16:7004 192.168.1.17:7005 192.168.1.18:7006
+--cluster-replicas 1
+"
+#networks:
+#- redis-cluster
+volumes:
+redis-data-node-1:
+redis-data-node-2:
+redis-data-node-3:
+redis-data-node-4:
+redis-data-node-5:
+redis-data-node-6:
+networks:
+redis-cluster:
+driver: bridge
+ipam:
+config:
+- subnet: 192.168.1.0/24 use this for the connection binding redis-cli --cluster create 192.38.0.11:6379 172.38.0.12:6379 172.38.0.13:6379 172.38.0.14:6379 172.38.0.15:6379 172.38.0.16:6379 --cluster-replicas 1
