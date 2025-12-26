@@ -1,0 +1,63 @@
+version: '3.9'
+services:
+  ussd_engine:
+    image: openjdk:17-jdk-slim
+    container_name: ussd_engine
+    build:
+      context: . # Assumes Dockerfile is in the same directory
+      dockerfile: Dockerfile
+    #deploy:
+    # mode: replicated
+    # replicas: 1
+    #
+    ports:
+      - "6767:6767" # Map the app's port (adjust as needed)
+    volumes:
+      - /home/ubuntu/USSDENGINE/:/app
+      - ussd_volume:/app/data
+    restart: unless-stopped
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MONGO_HOST=mongodb
+      - MONGO_PORT=27017
+      # - MONGO_USER=root
+      # - MONGO_PASS=example
+    depends_on:
+      - redis
+      - mongodb
+    networks:
+      - app-network
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    #restart: on-failure
+    volumes:
+      - redis-data:/data # Mount the volume for Redis data persistence
+    networks:
+      - app-network
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+ports:
+- "27017:27017"
+#restart: on-failure
+# environment:
+# - MONGO_INITDB_ROOT_USERNAME=root
+# - MONGO_INITDB_ROOT_PASSWORD=example
+volumes:
+- mongo-data:/data/db # Mount the volume for MongoDB data persistence
+networks:
+- app-network
+volumes:
+ussd_volume:
+driver: local
+redis-data:
+driver: local
+mongo-data:
+driver: local
+networks:
+app-network:
+driver: bridge
